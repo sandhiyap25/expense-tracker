@@ -15,20 +15,21 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // MySQL Connection
 const db = mysql.createConnection({
-    host: process.env.MYSQLHOST,
-    user: process.env.MYSQLUSER,
-    password: process.env.MYSQLPASSWORD,
-    database: process.env.MYSQLDATABASE,
-    port: process.env.MYSQLPORT
+    host: "localhost",
+    user: "root",
+    password: "",          // Change if your MySQL has a password
+    database: "expense_tracker"
 });
 
 db.connect((err) => {
     if (err) {
-        console.error("Database Connection Failed:", err);
+        console.log("Database Connection Failed!");
+        console.log(err);
         return;
     }
-    console.log("Connected to Railway MySQL");
+    console.log("Connected to MySQL");
 });
+
 
 // =========================
 // REGISTER
@@ -101,6 +102,11 @@ app.post("/login", (req, res) => {
 });
 
 
+// Start Server
+app.listen(3000, () => {
+    console.log("Server Running...");
+    console.log("http://localhost:3000");
+});
 // =========================
 // DASHBOARD
 // =========================
@@ -116,6 +122,7 @@ app.get("/dashboard/:userId", (req, res) => {
         recent: []
     };
 
+    // Total Income
     db.query(
         "SELECT IFNULL(SUM(amount),0) AS total FROM income WHERE user_id=?",
         [userId],
@@ -125,6 +132,7 @@ app.get("/dashboard/:userId", (req, res) => {
 
             dashboard.totalIncome = incomeResult[0].total;
 
+            // Total Expense (current month only)
             const currentMonth = new Date().getMonth() + 1;
             const currentYear = new Date().getFullYear();
 
@@ -137,6 +145,7 @@ app.get("/dashboard/:userId", (req, res) => {
 
                     dashboard.totalExpense = expenseResult[0].total;
 
+                    // Budget
                     db.query(
                         "SELECT IFNULL(SUM(budget_amount),0) AS total FROM budgets WHERE user_id=?",
                         [userId],
@@ -148,6 +157,7 @@ app.get("/dashboard/:userId", (req, res) => {
                             dashboard.remaining =
                                 dashboard.totalBudget - dashboard.totalExpense;
 
+                            // Recent Expenses
                             db.query(
                                 `SELECT e.expense_date,
                                         c.category_name,
@@ -181,10 +191,10 @@ app.get("/dashboard/:userId", (req, res) => {
     );
 
 });
-
 // ========================
 // GET CATEGORIES
 // ========================
+
 app.get("/categories", (req, res) => {
 
     const sql = "SELECT * FROM categories ORDER BY category_name";
@@ -199,10 +209,10 @@ app.get("/categories", (req, res) => {
     });
 
 });
-
 // ========================
 // ADD EXPENSE
 // ========================
+
 app.post("/expenses", (req, res) => {
 
     const {
@@ -239,10 +249,10 @@ app.post("/expenses", (req, res) => {
         });
 
 });
-
 // ========================
 // VIEW EXPENSES
 // ========================
+
 app.get("/expenses/:userId", (req, res) => {
 
     const userId = req.params.userId;
@@ -287,10 +297,10 @@ app.get("/expenses/:userId", (req, res) => {
     });
 
 });
-
 // ========================
 // DELETE EXPENSE
 // ========================
+
 app.delete("/expenses/:id",(req,res)=>{
 
     const id=req.params.id;
@@ -313,10 +323,6 @@ app.delete("/expenses/:id",(req,res)=>{
     });
 
 });
-
-// ========================
-// ADD INCOME
-// ========================
 app.post("/income",(req,res)=>{
 
 const {user_id,amount,source,income_date}=req.body;
@@ -336,10 +342,6 @@ res.json({message:"Income Added Successfully"});
 });
 
 });
-
-// ========================
-// VIEW INCOME
-// ========================
 app.get("/income/:userId",(req,res)=>{
 
 const userId=req.params.userId;
@@ -371,10 +373,6 @@ res.json(result);
 });
 
 });
-
-// ========================
-// DELETE INCOME
-// ========================
 app.delete("/income/:id",(req,res)=>{
 
 db.query(
@@ -392,10 +390,10 @@ res.json({message:"Income Deleted Successfully"});
 });
 
 });
-
 // =======================
 // SAVE BUDGET
 // =======================
+
 app.post("/budget",(req,res)=>{
 
 const {user_id,month,year,budget_amount}=req.body;
@@ -432,10 +430,10 @@ message:"Budget Saved Successfully"
 });
 
 });
-
 // =======================
 // LOAD BUDGET
 // =======================
+
 app.get("/budget/:userId",(req,res)=>{
 
 const userId=req.params.userId;
@@ -480,10 +478,10 @@ remaining:totalBudget-totalExpense
 });
 
 });
-
 // ==========================
 // REPORTS
 // ==========================
+
 app.get("/reports/:userId",(req,res)=>{
 
 const userId=req.params.userId;
@@ -502,14 +500,11 @@ if(err) return res.status(500).json(err);
 
 report.totalIncome=income[0].totalIncome;
 
-const currentMonth = new Date().getMonth() + 1;
-const currentYear = new Date().getFullYear();
-
 db.query(
 
-"SELECT IFNULL(SUM(amount),0) totalExpense FROM expenses WHERE user_id=? AND MONTH(expense_date)=? AND YEAR(expense_date)=?",
+"SELECT IFNULL(SUM(amount),0) totalExpense FROM expenses WHERE user_id=?",
 
-[userId, currentMonth, currentYear],
+[userId],
 
 (err,expense)=>{
 
@@ -530,14 +525,13 @@ JOIN categories c
 ON e.category_id=c.category_id
 
 WHERE e.user_id=?
-AND MONTH(e.expense_date)=?
-AND YEAR(e.expense_date)=?
 
 GROUP BY c.category_name`,
 
-[userId, currentMonth, currentYear],
+[userId],
 
 (err,result)=>{
+
 if(err) return res.status(500).json(err);
 
 report.categoryLabels=[];
@@ -560,12 +554,4 @@ res.json(report);
 
 });
 
-});
-
-// =========================
-// START SERVER
-// =========================
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server Running on port ${PORT}`);
 });
