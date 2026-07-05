@@ -15,10 +15,11 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // MySQL Connection
 const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",          // Change if your MySQL has a password
-    database: "expense_tracker"
+    host: process.env.MYSQLHOST,
+    user: process.env.MYSQLUSER,
+    password: process.env.MYSQLPASSWORD,
+    database: process.env.MYSQLDATABASE,
+    port: process.env.MYSQLPORT
 });
 
 db.connect((err) => {
