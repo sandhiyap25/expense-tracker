@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Tracker | Income</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,Helvetica,sans-serif;}
+body{background:#f4f6f9;}
+
+.sidebar{
+position:fixed;
+top:0;
+left:0;
+width:230px;
+height:100vh;
+background:#111827;
+display:flex;
+flex-direction:column;
+padding-top:24px;
+}
+
+.sidebar .brand{
+color:#fff;
+font-size:20px;
+font-weight:600;
+letter-spacing:.3px;
+padding:0 22px 24px 22px;
+}
+
+.sidebar a{
+display:flex;
+align-items:center;
+gap:10px;
+padding:14px 22px;
+color:#cbd5e1;
+text-decoration:none;
+font-size:15px;
+font-weight:500;
+border-left:3px solid transparent;
+transition:background .2s,color .2s;
+}
+.sidebar a:hover{background:#1f2937;color:#fff;}
+.sidebar a.active{background:#1f2937;color:#fff;border-left:3px solid #2563eb;}
+
+.logout{
+margin:20px 22px;
+margin-top:auto;
+width:calc(100% - 44px);
+background:#dc2626;
+color:#fff;
+padding:12px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-size:14px;
+font-weight:500;
+transition:background .2s;
+}
+.logout:hover{background:#b91c1c;}
+
+.main{margin-left:230px;padding:30px;min-height:100vh;}
+
+h1.page-title{margin-bottom:20px;color:#111827;}
+
+.content{display:flex;gap:30px;}
+
+.form{
+width:350px;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,.08);
+height:fit-content;
+}
+.form h2{margin-bottom:10px;font-size:18px;color:#111827;}
+
+.table{
+flex:1;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+.table h2{margin-bottom:10px;font-size:18px;color:#111827;}
+
+.filter-row{
+display:flex;
+gap:10px;
+margin-bottom:14px;
+}
+.filter-row select{
+flex:1;
+padding:8px 10px;
+border:1px solid #d1d5db;
+border-radius:6px;
+font-size:13px;
+background:#f9fafb;
+}
+
+input{
+width:100%;
+padding:10px;
+margin:10px 0;
+border:1px solid #d1d5db;
+border-radius:6px;
+font-size:14px;
+}
+
+button{
+width:100%;
+padding:12px;
+background:#2563eb;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-size:14px;
+font-weight:500;
+}
+button:hover{background:#1d4ed8;}
+
+table{width:100%;border-collapse:collapse;margin-top:10px;}
+th{background:#2563eb;color:white;padding:12px;text-align:left;padding-left:16px;font-size:14px;}
+td{padding:10px 16px;text-align:left;border-bottom:1px solid #eee;font-size:14px;}
+tr:hover{background:#f9fafb;}
+
+.delete{
+width:auto;
+background:#dc2626;
+padding:8px 12px;
+border:none;
+color:white;
+border-radius:4px;
+cursor:pointer;
+font-size:13px;
+}
+.delete:hover{background:#b91c1c;}
+
+@media(max-width:900px){
+.sidebar{display:none;}
+.main{margin-left:0;}
+.content{flex-direction:column;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+<div class="brand">Expense Tracker</div>
+<a href="dashboard.html">🏠 Dashboard</a>
+<a href="expenses.html">💸 Expenses</a>
+<a href="income.html" class="active">💰 Income</a>
+<a href="budget.html">📊 Budget</a>
+<a href="reports.html">📈 Reports</a>
+<button class="logout" onclick="logout()">Logout</button>
+</div>
+
+<div class="main">
+
+<h1 class="page-title">Income Management</h1>
+
+<div class="content">
+
+<div class="form">
+<h2>Add Income</h2>
+<form id="incomeForm">
+<input type="number" id="amount" placeholder="Amount" required>
+<input type="text" id="source" list="sourceOptions" placeholder="Source (e.g. Salary, Freelance)" required>
+<datalist id="sourceOptions">
+<option value="Salary">
+<option value="Freelance">
+<option value="Business">
+<option value="Investment">
+<option value="Gift">
+<option value="Other">
+</datalist>
+<input type="date" id="date" required>
+<button>Add Income</button>
+</form>
+</div>
+
+<div class="table">
+<h2>Income List</h2>
+
+<div class="filter-row">
+<select id="filterMonth"></select>
+<select id="filterYear"></select>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Amount</th>
+<th>Source</th>
+<th>Date</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="incomeTable"></tbody>
+</table>
+</div>
+
+</div>
+</div>
+
+<script>
+const user=JSON.parse(localStorage.getItem("user"));
+
+const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+populateFilters();
+loadIncome();
+
+function populateFilters(){
+const now=new Date();
+const monthSelect=document.getElementById("filterMonth");
+const yearSelect=document.getElementById("filterYear");
+
+monthNames.forEach((name,i)=>{
+monthSelect.innerHTML+=`<option value="${i+1}">${name}</option>`;
+});
+monthSelect.value=now.getMonth()+1;
+
+const currentYear=now.getFullYear();
+for(let y=currentYear-2;y<=currentYear+1;y++){
+yearSelect.innerHTML+=`<option value="${y}">${y}</option>`;
+}
+yearSelect.value=currentYear;
+
+monthSelect.addEventListener("change",loadIncome);
+yearSelect.addEventListener("change",loadIncome);
+}
+
+document.getElementById("incomeForm").addEventListener("submit",function(e){
+e.preventDefault();
+
+fetch("/income",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+user_id:user.user_id,
+amount:document.getElementById("amount").value,
+source:document.getElementById("source").value,
+income_date:document.getElementById("date").value
+})
+})
+.then(res=>res.json())
+.then(data=>{
+alert(data.message);
+document.getElementById("incomeForm").reset();
+loadIncome();
+});
+});
+
+function formatDate(dateStr){
+if(!dateStr) return "";
+const d=new Date(dateStr);
+return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'});
+}
+
+function loadIncome(){
+const month=document.getElementById("filterMonth").value;
+const year=document.getElementById("filterYear").value;
+
+fetch("/income/"+user.user_id+"?month="+month+"&year="+year)
+.then(res=>res.json())
+.then(data=>{
+let rows="";
+data.forEach(income=>{
+rows+=`
+<tr>
+<td>${income.income_id}</td>
+<td>₹${income.amount}</td>
+<td>${income.source}</td>
+<td>${formatDate(income.income_date)}</td>
+<td><button class="delete" onclick="deleteIncome(${income.income_id})">Delete</button></td>
+</tr>
+`;
+});
+document.getElementById("incomeTable").innerHTML=rows;
+});
+}
+
+function deleteIncome(id){
+if(confirm("Delete Income?")){
+fetch("/income/"+id,{method:"DELETE"})
+.then(res=>res.json())
+.then(data=>{
+alert(data.message);
+loadIncome();
+});
+}
+}
+
+function logout(){
+localStorage.clear();
+window.location.href="login.html";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Tracker</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',Arial,Helvetica,sans-serif;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#eef4ff 0%,#f4faf7 100%);
+    padding:20px;
+}
+
+.landing{
+    width:100%;
+    max-width:440px;
+    background:#ffffff;
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(37,99,235,0.12);
+    padding:48px 40px;
+    text-align:center;
+}
+
+.logo-badge{
+    width:64px;
+    height:64px;
+    margin:0 auto 20px;
+    border-radius:14px;
+    background:linear-gradient(135deg,#2563eb,#22c55e);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+    color:#fff;
+    font-weight:700;
+}
+
+h1{
+    font-size:26px;
+    color:#111827;
+    margin-bottom:8px;
+    font-weight:700;
+}
+
+.subtitle{
+    color:#6b7280;
+    font-size:15px;
+    margin-bottom:36px;
+    line-height:1.5;
+}
+
+.btn-group{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+.btn{
+    display:block;
+    width:100%;
+    padding:14px;
+    border-radius:8px;
+    font-size:15px;
+    font-weight:600;
+    text-decoration:none;
+    transition:background .2s, box-shadow .2s, transform .15s;
+}
+
+.btn-primary{
+    background:#2563eb;
+    color:#ffffff;
+}
+
+.btn-primary:hover{
+    background:#1d4ed8;
+    transform:translateY(-1px);
+}
+
+.btn-secondary{
+    background:#ffffff;
+    color:#2563eb;
+    border:1.5px solid #2563eb;
+}
+
+.btn-secondary:hover{
+    background:#eef4ff;
+    transform:translateY(-1px);
+}
+
+.footer-note{
+    margin-top:28px;
+    font-size:13px;
+    color:#22c55e;
+    font-weight:600;
+}
+
+</style>
+</head>
+<body>
+
+<div class="landing">
+
+    <div class="logo-badge">₹</div>
+
+    <h1>Expense Tracker</h1>
+    <p class="subtitle">Track your income, manage your budget, and stay on top of your spending — all in one place.</p>
+
+    <div class="btn-group">
+        <a href="login.html" class="btn btn-primary">Login</a>
+        <a href="register.html" class="btn btn-secondary">Create Account</a>
+    </div>
+
+    <p class="footer-note">Simple. Secure. Smart.</p>
+
+</div>
+
+</body>
+</html>

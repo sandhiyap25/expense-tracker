@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Tracker - Register</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',Arial,Helvetica,sans-serif;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#eef4ff 0%,#f4faf7 100%);
+    padding:20px;
+}
+
+.container{
+    width:100%;
+    max-width:400px;
+    background:#ffffff;
+    padding:40px 36px;
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(37,99,235,0.12);
+}
+
+.logo-badge{
+    width:56px;
+    height:56px;
+    margin:0 auto 18px;
+    border-radius:12px;
+    background:linear-gradient(135deg,#2563eb,#22c55e);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    color:#fff;
+    font-weight:700;
+}
+
+h2{
+    text-align:center;
+    color:#111827;
+    font-size:22px;
+    font-weight:700;
+    margin-bottom:6px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#6b7280;
+    font-size:14px;
+    margin-bottom:26px;
+}
+
+.field{
+    margin-bottom:16px;
+}
+
+label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    color:#374151;
+    margin-bottom:6px;
+}
+
+input{
+    width:100%;
+    padding:12px 14px;
+    border:1.5px solid #e5e7eb;
+    border-radius:8px;
+    font-size:14px;
+    color:#111827;
+    background:#f9fafb;
+    transition:border-color .2s, background .2s, box-shadow .2s;
+}
+
+input::placeholder{
+    color:#9ca3af;
+}
+
+input:focus{
+    outline:none;
+    border-color:#2563eb;
+    background:#ffffff;
+    box-shadow:0 0 0 3px rgba(37,99,235,0.12);
+}
+
+button{
+    width:100%;
+    padding:13px;
+    margin-top:8px;
+    background:#22c55e;
+    color:#ffffff;
+    border:none;
+    border-radius:8px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .2s, transform .15s;
+}
+
+button:hover{
+    background:#16a34a;
+    transform:translateY(-1px);
+}
+
+p.footer{
+    margin-top:22px;
+    text-align:center;
+    font-size:14px;
+    color:#6b7280;
+}
+
+a{
+    text-decoration:none;
+    color:#2563eb;
+    font-weight:600;
+}
+
+a:hover{
+    text-decoration:underline;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo-badge">₹</div>
+
+    <h2>Create Account</h2>
+    <p class="subtitle">Sign up to start tracking your expenses</p>
+
+    <form id="registerForm">
+
+        <div class="field">
+            <label for="user_id">User ID</label>
+            <input type="text" id="user_id" placeholder="Choose a user ID" required>
+        </div>
+
+        <div class="field">
+            <label for="full_name">Full Name</label>
+            <input type="text" id="full_name" placeholder="Enter your full name" required>
+        </div>
+
+        <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="Enter your email" required>
+        </div>
+
+        <div class="field">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Create a password" required>
+        </div>
+
+        <button type="submit">Register</button>
+
+    </form>
+
+    <p class="footer">
+        Already have an account?
+        <a href="login.html">Login</a>
+    </p>
+
+</div>
+
+<script>
+
+document.getElementById("registerForm").addEventListener("submit", function(e){
+
+    e.preventDefault();
+
+    const user_id = document.getElementById("user_id").value;
+    const full_name = document.getElementById("full_name").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    fetch("/register", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            user_id,
+            full_name,
+            email,
+            password
+        })
+
+    })
+
+    .then(res => res.json())
+
+    .then(data => {
+
+        if(data.success){
+
+            alert("Registration Successful");
+
+            window.location.href = "login.html";
+
+        }
+        else{
+
+            alert(data.message);
+
+        }
+
+    })
+
+    .catch(err => {
+
+        console.log(err);
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>

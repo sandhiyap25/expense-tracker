@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Tracker | Budget</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,Helvetica,sans-serif;}
+body{background:#f4f6f9;}
+
+.sidebar{
+position:fixed;
+top:0;
+left:0;
+width:230px;
+height:100vh;
+background:#111827;
+display:flex;
+flex-direction:column;
+padding-top:24px;
+}
+
+.sidebar .brand{
+color:#fff;
+font-size:20px;
+font-weight:600;
+letter-spacing:.3px;
+padding:0 22px 24px 22px;
+}
+
+.sidebar a{
+display:flex;
+align-items:center;
+gap:10px;
+padding:14px 22px;
+color:#cbd5e1;
+text-decoration:none;
+font-size:15px;
+font-weight:500;
+border-left:3px solid transparent;
+transition:background .2s,color .2s;
+}
+.sidebar a:hover{background:#1f2937;color:#fff;}
+.sidebar a.active{background:#1f2937;color:#fff;border-left:3px solid #2563eb;}
+
+.logout{
+margin:20px 22px;
+margin-top:auto;
+width:calc(100% - 44px);
+background:#dc2626;
+color:#fff;
+padding:12px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-size:14px;
+font-weight:500;
+transition:background .2s;
+}
+.logout:hover{background:#b91c1c;}
+
+.main{margin-left:230px;padding:30px;min-height:100vh;display:flex;justify-content:center;}
+
+.budget-box{
+max-width:600px;
+width:100%;
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,.08);
+height:fit-content;
+}
+
+.budget-box h1{margin-bottom:20px;text-align:center;color:#111827;font-size:22px;}
+
+input{
+width:100%;
+padding:12px;
+margin:12px 0;
+font-size:15px;
+border:1px solid #d1d5db;
+border-radius:6px;
+}
+
+button{
+width:100%;
+padding:12px;
+background:#2563eb;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-size:15px;
+font-weight:500;
+}
+button:hover{background:#1d4ed8;}
+
+.card{
+margin-top:30px;
+padding:20px;
+background:#eef4ff;
+border-radius:10px;
+}
+.card h2{margin-bottom:15px;font-size:18px;color:#111827;}
+.card p{font-size:16px;margin:10px 0;color:#374151;}
+
+@media(max-width:900px){
+.sidebar{display:none;}
+.main{margin-left:0;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+<div class="brand">Expense Tracker</div>
+<a href="dashboard.html">🏠 Dashboard</a>
+<a href="expenses.html">💸 Expenses</a>
+<a href="income.html">💰 Income</a>
+<a href="budget.html" class="active">📊 Budget</a>
+<a href="reports.html">📈 Reports</a>
+<button class="logout" onclick="logout()">Logout</button>
+</div>
+
+<div class="main">
+
+<div class="budget-box">
+
+<h1>Monthly Budget</h1>
+
+<form id="budgetForm">
+<input type="number" id="budget" placeholder="Enter Monthly Budget" required>
+<button>Save Budget</button>
+</form>
+
+<div class="card">
+<h2>Budget Summary</h2>
+<p>Total Budget : <b id="totalBudget">₹0</b></p>
+<p>Total Expense : <b id="totalExpense">₹0</b></p>
+<p>Remaining : <b id="remaining">₹0</b></p>
+</div>
+
+</div>
+</div>
+
+<script>
+const user=JSON.parse(localStorage.getItem("user"));
+
+const currentMonth=new Date().getMonth()+1;
+const currentYear=new Date().getFullYear();
+
+loadBudget();
+
+document.getElementById("budgetForm").addEventListener("submit",function(e){
+e.preventDefault();
+
+fetch("/budget",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+user_id:user.user_id,
+month:currentMonth,
+year:currentYear,
+budget_amount:document.getElementById("budget").value
+})
+})
+.then(res=>res.json())
+.then(data=>{
+alert(data.message);
+document.getElementById("budgetForm").reset();
+loadBudget();
+});
+});
+
+function loadBudget(){
+fetch("/budget/"+user.user_id+"?month="+currentMonth+"&year="+currentYear)
+.then(res=>res.json())
+.then(data=>{
+document.getElementById("totalBudget").innerHTML="₹"+data.totalBudget;
+document.getElementById("totalExpense").innerHTML="₹"+data.totalExpense;
+document.getElementById("remaining").innerHTML="₹"+data.remaining;
+});
+}
+
+function logout(){
+localStorage.clear();
+window.location.href="login.html";
+}
+</script>
+
+</body>
+</html>

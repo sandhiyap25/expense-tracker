@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Management</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f5f7fb;
+    padding:30px;
+}
+
+h1{
+    margin-bottom:20px;
+    color:#2563eb;
+}
+
+.container{
+    display:flex;
+    gap:30px;
+}
+
+.form-box{
+    width:350px;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 10px rgba(0,0,0,.2);
+}
+
+.form-box input,
+.form-box select{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    background:#2563eb;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#1d4ed8;
+}
+
+.table-box{
+    flex:1;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 10px rgba(0,0,0,.2);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#2563eb;
+    color:white;
+    padding:12px;
+}
+
+td{
+    text-align:center;
+    padding:10px;
+    border-bottom:1px solid #ddd;
+}
+
+.delete{
+    background:red;
+    padding:8px 12px;
+    border:none;
+    color:white;
+    border-radius:4px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Expense Management</h1>
+
+<div class="container">
+
+<div class="form-box">
+
+<h2>Add Expense</h2>
+
+<form id="expenseForm">
+
+<select id="category"></select>
+
+<input type="number" id="amount" placeholder="Amount" required>
+
+<input type="date" id="date" required>
+
+<input type="text" id="description" placeholder="Description" required>
+
+<button type="submit">Add Expense</button>
+
+</form>
+
+</div>
+
+<div class="table-box">
+
+<h2>Expense List</h2>
+
+<br>
+
+<table>
+
+<thead>
+
+<tr>
+<th>ID</th>
+<th>Category</th>
+<th>Amount</th>
+<th>Date</th>
+<th>Description</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+<tbody id="expenseTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+const user = JSON.parse(localStorage.getItem("user"));
+
+loadCategories();
+loadExpenses();
+
+function loadCategories(){
+
+fetch("/categories")
+
+.then(res=>res.json())
+
+.then(data=>{
+
+let option="";
+
+data.forEach(c=>{
+
+option+=`
+<option value="${c.category_id}">
+${c.category_name}
+</option>
+`;
+
+});
+
+document.getElementById("category").innerHTML=option;
+
+});
+
+}
+
+document.getElementById("expenseForm").addEventListener("submit",function(e){
+
+e.preventDefault();
+
+fetch("/expenses",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+user_id:user.user_id,
+category_id:document.getElementById("category").value,
+amount:document.getElementById("amount").value,
+expense_date:document.getElementById("date").value,
+description:document.getElementById("description").value
+
+})
+
+})
+
+.then(res=>res.json())
+
+.then(data=>{
+
+alert(data.message);
+
+document.getElementById("expenseForm").reset();
+
+loadExpenses();
+
+});
+
+});
+
+function loadExpenses(){
+
+fetch("/expenses/"+user.user_id)
+
+.then(res=>res.json())
+
+.then(data=>{
+
+let rows="";
+
+data.forEach(exp=>{
+
+rows+=`
+
+<tr>
+
+<td>${exp.expense_id}</td>
+<td>${exp.category_name}</td>
+<td>₹${exp.amount}</td>
+<td>${exp.expense_date}</td>
+<td>${exp.description}</td>
+
+<td>
+
+<button
+class="delete"
+onclick="deleteExpense(${exp.expense_id})">
+
+Delete
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+document.getElementById("expenseTable").innerHTML=rows;
+
+});
+
+}
+
+function deleteExpense(id){
+
+if(confirm("Delete this expense?")){
+
+fetch("/expenses/"+id,{
+
+method:"DELETE"
+
+})
+
+.then(res=>res.json())
+
+.then(data=>{
+
+alert(data.message);
+
+loadExpenses();
+
+});
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
