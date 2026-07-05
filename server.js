@@ -14,6 +14,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
 // MySQL Connection
+const mysql = require("mysql2");
+
 const db = mysql.createConnection({
     host: process.env.MYSQLHOST,
     user: process.env.MYSQLUSER,
@@ -24,13 +26,11 @@ const db = mysql.createConnection({
 
 db.connect((err) => {
     if (err) {
-        console.log("Database Connection Failed!");
-        console.log(err);
+        console.error("Database Connection Failed:", err);
         return;
     }
-    console.log("Connected to MySQL");
+    console.log("Connected to Railway MySQL");
 });
-
 
 // =========================
 // REGISTER
